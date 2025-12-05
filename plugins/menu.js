@@ -3,12 +3,12 @@ const { cmd, commands } = require("../command");
 cmd(
   {
     pattern: "menu",
-    desc: "Displays all available commands",
+    desc: "Displays all available commands to use MALINDU AI BOT",
     category: "main",
     filename: __filename,
   },
   async (
-    danuwa,
+    bot,
     mek,
     m,
     {
@@ -45,3 +45,4 @@ cmd(
     }
   }
 );
+
