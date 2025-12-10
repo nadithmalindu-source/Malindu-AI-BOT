@@ -1,58 +1,15 @@
-const { cmd } = require("../command");
-const { tiktokDownloader } = require("@mrnima/tiktok-downloader");
+const { tiktokDownloader } = require('../lib/tiktok');
 
-cmd(
-  {
-    pattern: "tt",
-    react: "🎵",
-    desc: "Download TikTok Video",
-    category: "download",
-    filename: __filename,
-  },
-  async (
-    danuwa,
-    mek,
-    m,
-    {
-      from,
-      quoted,
-      body,
-      isCmd,
-      command,
-      args,
-      q,
-      isGroup,
-      sender,
-      senderNumber,
-      botNumber2,
-      botNumber,
-      pushname,
-      isMe,
-      isOwner,
-      groupMetadata,
-      groupName,
-      participants,
-      groupAdmins,
-      isBotAdmins,
-      isAdmins,
-      reply,
-    }
-  ) => {
-    try {
-      if (!q) return reply("❌ Please provide TikTok video URL!");
-
-      reply("⏳ Downloading your TikTok video...");
-
-      const videoData = await tiktokDownloader(q);
-
-      await danuwa.sendMessage(from, {
-        video: { url: videoData.downloadUrl },
-        caption: `✅ TikTok video downloaded successfully!`,
-      }, { quoted: mek });
-
-    } catch (e) {
-      console.error(e);
-      reply(`❌ Error: ${e.message}`);
-    }
+cmd({
+  pattern: 'tt',
+  desc: 'Download TikTok video',
+  fromMe: false
+}, async (bot, mek, m, { args, reply }) => {
+  try {
+    if (!args[0]) return reply('Send TikTok link');
+    const data = await tiktokDownloader(args[0]);
+    await bot.sendMessage(mek.key.remoteJid, { video: { url: data.video }, caption: 'TikTok Video' }, { quoted: mek });
+  } catch (e) {
+    reply('TikTok download failed ❌');
   }
-);
+});
