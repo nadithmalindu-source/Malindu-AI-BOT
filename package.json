@@ -1,12 +1,12 @@
 {
-  "name": "MALINDU AI BOT",
+  "name": "MALIYA-MD",
   "version": "1.0.0",
   "description": "A Powerfull AI Whatsapp Bot",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start index.js --deep-monitoring --attach --name MALINDU AI BOT",
-    "stop": "pm2 stop MALINDU AI BOT",
-    "restart": "pm2 restart MALINDU AI BOT"
+    "start": "pm2 start index.js --deep-monitoring --attach --name MALIYA-MD",
+    "stop": "pm2 stop MALIYA-MD",
+    "restart": "pm2 restart MALIYA-MD"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "letast",
