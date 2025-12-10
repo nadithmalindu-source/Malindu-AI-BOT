@@ -63,7 +63,7 @@ async function ensureSessionFile() {
 }
 
 async function connectToWA() {
-  console.log("Connecting MALINDU AI BOT 🧬...");
+  console.log("Connecting MALIYA-MD 🧬...");
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, '/auth_info_baileys/'));
   const { version } = await fetchLatestBaileysVersion();
 
@@ -85,9 +85,9 @@ async function connectToWA() {
         connectToWA();
       }
     } else if (connection === 'open') {
-      console.log('✅ MALINDU AI BOT connected to WhatsApp');
+      console.log('✅ MALIYA-MD connected to WhatsApp');
 
-      const up = `MALINDU AI BOT connected ✅\n\nPREFIX: ${prefix}`;
+      const up = `MALIYA-MD connected ✅\n\nPREFIX: ${prefix}`;
       await bot.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
         image: { url: `https://github.com/nadithmalindu-source/Malindu-AI-BOT/blob/main/image/Gemini_Generated_Image_unjbleunjbleunjb.png?raw=true` },
         caption: up
@@ -179,7 +179,7 @@ async function connectToWA() {
 ensureSessionFile();
 
 app.get("/", (req, res) => {
-  res.send("Hey User, MALINDU AI BOT started✅");
+  res.send("Hey User, MALIYA-MD started✅");
 });
 
 app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));
