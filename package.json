@@ -36,6 +36,7 @@
     "wa-sticker-formatter": "latest",
     "jimp": "latest",
     "genius-lyrics": "latest",
-    "@xaviabot/fb-downloader": "latest"
+    "@xaviabot/fb-downloader": "latest",
+    "@vreden/youtube_scraper": "latest"
   }
 }
