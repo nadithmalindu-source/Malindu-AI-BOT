@@ -1,39 +1,52 @@
+// plugins/tiktok.js
 import fetch from "node-fetch";
+import fs from "fs";
+import path from "path";
 
 export default {
   name: "tiktok",
   pattern: "tt",
-  react: "🎵",
-  desc: "Download TikTok video without watermark",
+  react: "🎬",
+  desc: "Download TikTok Video via RapidAPI",
   category: "download",
-  async execute(bot, mek, m, { from, body, q, reply, sendVideo }) {
+  filename: path.basename(import.meta.url),
+
+  async execute(bot, mek, m, { from, body, q, reply }) {
     try {
-      // User TikTok link validation
-      if (!q) return reply("📌 TikTok link ekak denna. Udaharanayak: tt https://www.tiktok.com/...");
+      const videoUrl = q || (m.quoted && m.quoted.text);
+      if (!videoUrl) return reply("❌ TikTok link ekak danna.");
 
-      // RapidAPI TikTok downloader endpoint
-      const url = `https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/?url=${encodeURIComponent(q)}`;
-
-      // API call
-      const res = await fetch(url, {
-        method: "GET",
-        headers: {
-          "X-RapidAPI-Host": "tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com",
-          "X-RapidAPI-Key": "bfb99d7c60msh60d1bf0d14339c1p1c6d34jsn8cffebfe8f5e"
+      // RapidAPI request
+      const apiRes = await fetch(
+        `https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/vid/index?url=${encodeURIComponent(videoUrl)}`,
+        {
+          method: "GET",
+          headers: {
+            "x-rapidapi-host": "tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com",
+            "x-rapidapi-key": "bfb99d7c60msh60d1bf0d14339c1p1c6d34jsn8cffebfe8f5e",
+          },
         }
-      });
+      );
 
-      const data = await res.json();
+      const data = await apiRes.json();
 
-      // Check if video link is available
-      if (!data.video || data.video === "") return reply("❌ Video eka ganna behe 😢");
+      if (!data || !data.video_no_watermark) return reply("❌ Video download karanna ba.");
 
-      // Send TikTok video to chat
-      await sendVideo(from, data.video, { caption: "TikTok video 🎬" });
+      // Download video
+      const videoBuffer = Buffer.from(await (await fetch(data.video_no_watermark)).arrayBuffer());
 
+      // Save temporarily
+      const tempPath = path.join("/tmp", `tt_${Date.now()}.mp4`);
+      fs.writeFileSync(tempPath, videoBuffer);
+
+      // Send video
+      await bot.sendMessage(from, { video: fs.readFileSync(tempPath), caption: "✅ TikTok Video!" });
+
+      // Remove temp file
+      fs.unlinkSync(tempPath);
     } catch (err) {
-      console.error("TikTok Plugin Error:", err);
-      reply("❌ TikTok download karanna bari 😔");
+      console.error(err);
+      reply("❌ TikTok video download karanna awulak thibuna.");
     }
-  }
+  },
 };
