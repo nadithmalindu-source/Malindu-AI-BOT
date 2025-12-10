@@ -1,63 +1,69 @@
-const { cmd } = require("../command");
-const { Sticker } = require("wa-sticker-formatter");
+ const { downloadContentFromMessage } = require("@whiskeysockets/baileys");
+const { sticker } = require("../lib/sticker");
 
 cmd(
   {
-    pattern: "sticker",
-    react: "🖼️",
-    desc: "Convert image/video to sticker",
-    category: "sticker",
+    pattern: "st",
+    alias: ["s"],
+    desc: "Convert image or video to sticker",
+    category: "tools",
     filename: __filename,
   },
+
   async (
-    danuwa,
+    bot,
     mek,
     m,
     {
-      from,
-      quoted,
-      body,
-      isCmd,
-      command,
-      args,
-      q,
-      isGroup,
-      sender,
-      senderNumber,
-      botNumber2,
-      botNumber,
-      pushname,
-      isMe,
-      isOwner,
-      groupMetadata,
-      groupName,
-      participants,
-      groupAdmins,
-      isBotAdmins,
-      isAdmins,
       reply,
+      quoted,
     }
   ) => {
     try {
-      let media = quoted ? quoted : mek;
-      if (!media || !media.message) return reply("❌ Please send an image/video!");
+      const msg = quoted || m;
 
-      let buffer = await danuwa.downloadAndSaveMediaMessage(media, "temp");
+      if (!msg.message) {
+        return reply("📌 *Send an image/video with caption .s*");
+      }
 
-      const sticker = new Sticker(buffer, {
-        pack: "MALIYA-MD",
-        author: pushname || "MALIYA-MD",
-        type: "full",
-        categories: ["🤖", "💚"],
+      let type = Object.keys(msg.message)[0];
+
+      if (!["imageMessage", "videoMessage"].includes(type)) {
+        return reply("❌ *Please send an image or video!*");
+      }
+
+      // ─────────────────────────────────────
+      // 📥 DOWNLOAD MEDIA (NEW BAILEYS API)
+      // ─────────────────────────────────────
+      let mimeType = type.replace("Message", "");
+      const stream = await downloadContentFromMessage(
+        msg.message[type],
+        mimeType
+      );
+
+      let buffer = Buffer.from([]);
+
+      for await (const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk]);
+      }
+
+      // ─────────────────────────────────────
+      // 🎨 CONVERT TO STICKER
+      // ─────────────────────────────────────
+      let stickerBuffer = await sticker(buffer, {
+        packname: "MALIYA-MD",
+        author: "Malindu",
       });
 
-      const stickerBuffer = await sticker.toBuffer();
+      await bot.sendMessage(
+        m.chat,
+        { sticker: stickerBuffer },
+        { quoted: mek }
+      );
 
-      await danuwa.sendMessage(from, { sticker: stickerBuffer }, { quoted: mek });
-
-    } catch (e) {
-      console.error(e);
-      reply(`❌ Error: ${e.message}`);
+    } catch (err) {
+      console.error(err);
+      reply("❌ *Error converting to sticker!*");
     }
   }
 );
