@@ -3,7 +3,7 @@ const { cmd, commands } = require("../command");
 cmd(
   {
     pattern: "menu",
-    desc: "Displays all available commands",
+    desc: "Displays all available commands to use MALIYA-MD",
     category: "main",
     filename: __filename,
   },
@@ -38,11 +38,22 @@ cmd(
         });
       }
 
-      await reply(menuText.trim());
+      // ✨ React emoji එකක් send කරන්න
+      await bot.sendMessage(from, { react: { text: "🗒️", key: mek.key } });
+
+      // 📸 Image එක සහ menu text එක send කරන්න
+      await bot.sendMessage(
+        from,
+        {
+          image: { url: "https://github.com/nadithmalindu-source/Malindu-AI-BOT/blob/main/image/Gemini_Generated_Image_unjbleunjbleunjb.png?raw=true" },
+          caption: menuText.trim(),
+        },
+        { quoted: mek }
+      );
+
     } catch (err) {
       console.error(err);
       reply("❌ Error generating menu.");
     }
   }
 );
-
