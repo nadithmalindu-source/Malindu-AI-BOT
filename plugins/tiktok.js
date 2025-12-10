@@ -4,6 +4,8 @@ const { cmd } = require('../command'); // Make sure path is correct
 cmd({
     pattern: 'tiktok',
     desc: 'Download TikTok video without watermark',
+    category: "download",
+    filename: __filename,
     fromMe: false
 }, async (bot, mek, m, { from, quoted, body, q, reply }) => {
     try {
