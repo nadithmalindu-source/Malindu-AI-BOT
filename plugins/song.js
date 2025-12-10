@@ -99,7 +99,7 @@ cmd(
         "✅ *Song downloaded successfully!* 🎶\n\n" +
         "*🎧 Enjoy your music!*\n" +
         "*👤 Creator:* Malindu Nadith\n\n" +
-        "🙏 Thanks for using *MALIYA-MD*"
+        "🙏 Thanks for using *_MALIYA-MD_*"
       );
     } catch (e) {
       console.log(e);
