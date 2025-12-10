@@ -35,6 +35,7 @@
     "@mrnima/tiktok-downloader": "latest",
     "wa-sticker-formatter": "latest",
     "jimp": "latest",
-    "genius-lyrics": "latest"
+    "genius-lyrics": "latest",
+    "@xaviabot/fb-downloader": "latest"
   }
 }
