@@ -1,22 +1,19 @@
-var commands = [];
-var replyHandlers = [];
+const commands = [];
+const replyHandlers = [];
 
 function cmd(info, func) {
     const data = info;
     data.function = func;
 
-    // Default fields
-    if (!data.dontAddCommandList) data.dontAddCommandList = false;
-    if (!data.desc) data.desc = '';
-    if (!data.category) data.category = 'misc';
-    if (!data.filename) data.filename = "Not Provided";
-    if (!data.fromMe) data.fromMe = false;
-
-    // Register reply-based handler if no pattern and has filter
-    if (!data.pattern && typeof data.filter === "function") {
-        replyHandlers.push(data);
-    } else {
+    // Normalize pattern
+    if (data.pattern) {
+        data.pattern = data.pattern.toLowerCase();
         commands.push(data);
+    } 
+    
+    // Reply handlers without prefix
+    else if (typeof data.filter === "function") {
+        replyHandlers.push(data);
     }
 
     return data;
@@ -24,9 +21,6 @@ function cmd(info, func) {
 
 module.exports = {
     cmd,
-    AddCommand: cmd,
-    Function: cmd,
-    Module: cmd,
     commands,
-    replyHandlers,
+    replyHandlers
 };
