@@ -31,6 +31,10 @@
     "qrcode-terminal": "letast",
     "tmp": "letast",
     "util": "letast",
-    "vm": "letast"
+    "vm": "letast",
+    "@mrnima/tiktok-downloader": "latest",
+    "wa-sticker-formatter": "latest",
+    "jimp": "latest",
+    "genius-lyrics": "latest"
   }
 }
