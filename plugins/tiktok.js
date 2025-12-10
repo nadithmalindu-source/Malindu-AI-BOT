@@ -3,7 +3,7 @@ const { tiktokDownloader } = require("@mrnima/tiktok-downloader");
 
 cmd(
   {
-    pattern: "tiktok",
+    pattern: "tt",
     react: "🎵",
     desc: "Download TikTok Video",
     category: "download",
