@@ -33,37 +33,35 @@ const credsPath = path.join(__dirname, '/auth_info_baileys/creds.json');
 async function ensureSessionFile() {
   if (!fs.existsSync(credsPath)) {
     if (!config.SESSION_ID) {
-      console.error('❌ SESSION_ID env variable is missing. Cannot restore session.');
+      console.error('❌ SESSION_ID missing!');
       process.exit(1);
     }
 
-    console.log("🔄 creds.json not found. Downloading session from MEGA...");
+    console.log("🔄 Downloading WhatsApp session from MEGA...");
 
     const sessdata = config.SESSION_ID;
     const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
 
     filer.download((err, data) => {
       if (err) {
-        console.error("❌ Failed to download session file from MEGA:", err);
+        console.error("❌ Failed to download session:", err);
         process.exit(1);
       }
 
       fs.mkdirSync(path.join(__dirname, '/auth_info_baileys/'), { recursive: true });
       fs.writeFileSync(credsPath, data);
-      console.log("✅ Session downloaded and saved. Restarting bot...");
-      setTimeout(() => {
-        connectToWA();
-      }, 2000);
+
+      console.log("✅ Session restored! Restarting...");
+      setTimeout(connectToWA, 1500);
     });
   } else {
-    setTimeout(() => {
-      connectToWA();
-    }, 1000);
+    setTimeout(connectToWA, 800);
   }
 }
 
 async function connectToWA() {
-  console.log("Connecting MALIYA-MD 🧬...");
+  console.log("🔌 Connecting MALIYA-MD ...");
+
   const { state, saveCreds } = await useMultiFileAuthState(path.join(__dirname, '/auth_info_baileys/'));
   const { version } = await fetchLatestBaileysVersion();
 
@@ -73,104 +71,126 @@ async function connectToWA() {
     browser: Browsers.macOS("Firefox"),
     auth: state,
     version,
-    syncFullHistory: true,
-    markOnlineOnConnect: true,
-    generateHighQualityLinkPreview: true,
   });
 
-  bot.ev.on('connection.update', async (update) => {
-    const { connection, lastDisconnect } = update;
-    if (connection === 'close') {
-      if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut) {
+  bot.ev.on("connection.update", async ({ connection, lastDisconnect }) => {
+    if (connection === "close") {
+      if (lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut)
         connectToWA();
-      }
-    } else if (connection === 'open') {
-      console.log('✅ MALIYA-MD connected to WhatsApp');
 
-      const up = `MALIYA-MD connected ✅\n\nPREFIX: ${prefix}`;
-      await bot.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/nadithmalindu-source/Malindu-AI-BOT/blob/main/image/Gemini_Generated_Image_unjbleunjbleunjb.png?raw=true` },
-        caption: up
-      });
+    } else if (connection === "open") {
+      console.log("✅ MALIYA-MD connected!");
 
-      fs.readdirSync("./plugins/").forEach((plugin) => {
-        if (path.extname(plugin).toLowerCase() === ".js") {
-          require(`./plugins/${plugin}`);
+      await bot.sendMessage(
+        ownerNumber[0] + "@s.whatsapp.net",
+        {
+          image: {
+            url: "https://github.com/nadithmalindu-source/Malindu-AI-BOT/blob/main/image/Gemini_Generated_Image_unjbleunjbleunjb.png?raw=true"
+          },
+          caption: "MALIYA-MD connected successfully ⚡"
         }
-      });
+      );
+
+      console.log("🔄 Loading plugins...");
+      fs.readdirSync("./plugins/")
+        .filter(file => file.endsWith(".js"))
+        .forEach(file => {
+          try {
+            require(`./plugins/${file}`);
+            console.log("✔️ Plugin Loaded:", file);
+          } catch (err) {
+            console.log("❌ Plugin Error:", file, err);
+          }
+        });
+      console.log("✅ All plugins loaded!");
     }
   });
 
-  bot.ev.on('creds.update', saveCreds);
+  bot.ev.on("creds.update", saveCreds);
 
-  bot.ev.on('messages.upsert', async ({ messages }) => {
-    for (const msg of messages) {
-      if (msg.messageStubType === 68) {
-        await bot.sendMessageAck(msg.key);
-      }
-    }
-
+  bot.ev.on("messages.upsert", async ({ messages }) => {
     const mek = messages[0];
-    if (!mek || !mek.message) return;
+    if (!mek?.message) return;
 
-    mek.message = getContentType(mek.message) === 'ephemeralMessage' ? mek.message.ephemeralMessage.message : mek.message;
-    if (mek.key.remoteJid === 'status@broadcast') return;
+    mek.message =
+      getContentType(mek.message) === "ephemeralMessage"
+        ? mek.message.ephemeralMessage.message
+        : mek.message;
+
+    if (mek.key.remoteJid === "status@broadcast") return;
 
     const m = sms(bot, mek);
-    const type = getContentType(mek.message);
     const from = mek.key.remoteJid;
-    const body = type === 'conversation' ? mek.message.conversation : mek.message[type]?.text || mek.message[type]?.caption || '';
+    const type = getContentType(mek.message);
+
+    const body =
+      type === "conversation"
+        ? mek.message.conversation
+        : mek.message[type]?.text || mek.message[type]?.caption || "";
+
     const isCmd = body.startsWith(prefix);
-    const commandName = isCmd ? body.slice(prefix.length).trim().split(" ")[0].toLowerCase() : '';
-    const args = body.trim().split(/ +/).slice(1);
-    const q = args.join(' ');
+    const commandName = isCmd ? body.slice(1).trim().split(" ")[0].toLowerCase() : "";
+    const args = body.split(" ").slice(1);
+    const q = args.join(" ");
 
-    const sender = mek.key.fromMe ? bot.user.id : (mek.key.participant || mek.key.remoteJid);
-    const senderNumber = sender.split('@')[0];
-    const isGroup = from.endsWith('@g.us');
-    const botNumber = bot.user.id.split(':')[0];
-    const pushname = mek.pushName || 'Sin Nombre';
-    const isMe = botNumber.includes(senderNumber);
-    const isOwner = ownerNumber.includes(senderNumber) || isMe;
-    const botNumber2 = await jidNormalizedUser(bot.user.id);
+    const sender = mek.key.fromMe ? bot.user.id : mek.key.participant || mek.key.remoteJid;
+    const senderNumber = sender.split("@")[0];
+    const isGroup = from.endsWith("@g.us");
 
-    const groupMetadata = isGroup ? await bot.groupMetadata(from).catch(() => {}) : '';
-    const groupName = isGroup ? groupMetadata.subject : '';
-    const participants = isGroup ? groupMetadata.participants : '';
-    const groupAdmins = isGroup ? await getGroupAdmins(participants) : '';
-    const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false;
-    const isAdmins = isGroup ? groupAdmins.includes(sender) : false;
+    const botNumber = bot.user.id.split(":")[0];
+    const pushname = mek.pushName || "User";
 
-    const reply = (text) => bot.sendMessage(from, { text }, { quoted: mek });
+    const isOwner = ownerNumber.includes(senderNumber);
 
+    const reply = (txt) => bot.sendMessage(from, { text: txt }, { quoted: mek });
+
+    // Command Handler
     if (isCmd) {
-      const cmd = commands.find((c) => c.pattern === commandName || (c.alias && c.alias.includes(commandName)));
+      const cmd = commands.find(
+        (c) =>
+          c.pattern === commandName ||
+          (c.alias && c.alias.includes(commandName))
+      );
+
       if (cmd) {
-        if (cmd.react) bot.sendMessage(from, { react: { text: cmd.react, key: mek.key } });
         try {
+          if (cmd.react) {
+            bot.sendMessage(from, { react: { text: cmd.react, key: mek.key } });
+          }
+
           cmd.function(bot, mek, m, {
-            from, quoted: mek, body, isCmd, command: commandName, args, q,
-            isGroup, sender, senderNumber, botNumber2, botNumber, pushname,
-            isMe, isOwner, groupMetadata, groupName, participants, groupAdmins,
-            isBotAdmins, isAdmins, reply,
+            from,
+            quoted: mek,
+            body,
+            command: commandName,
+            args,
+            q,
+            isGroup,
+            sender,
+            senderNumber,
+            isOwner,
+            reply,
           });
         } catch (e) {
-          console.error("[PLUGIN ERROR]", e);
+          console.log("❌ Plugin Error:", e);
         }
       }
     }
 
-    const replyText = body;
+    // Reply Handlers
     for (const handler of replyHandlers) {
-      if (handler.filter(replyText, { sender, message: mek })) {
-        try {
+      try {
+        if (handler.filter(body, { sender, message: mek })) {
           await handler.function(bot, mek, m, {
-            from, quoted: mek, body: replyText, sender, reply,
+            from,
+            body,
+            sender,
+            reply,
           });
           break;
-        } catch (e) {
-          console.log("Reply handler error:", e);
         }
+      } catch (err) {
+        console.log("Reply handler error:", err);
       }
     }
   });
@@ -178,8 +198,5 @@ async function connectToWA() {
 
 ensureSessionFile();
 
-app.get("/", (req, res) => {
-  res.send("Hey User, MALIYA-MD started✅");
-});
-
-app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));
+app.get("/", (req, res) => res.send("MALIYA-MD Started ⚡"));
+app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
