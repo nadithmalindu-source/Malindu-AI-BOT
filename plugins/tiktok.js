@@ -14,7 +14,7 @@ export default {
   async execute(bot, mek, m, { from, body, q, reply }) {
     try {
       const videoUrl = q || (m.quoted && m.quoted.text);
-      if (!videoUrl) return reply("❌ TikTok link ekak danna.");
+      if (!videoUrl) return reply("❌ TikTok link not found.");
 
       // RapidAPI request
       const apiRes = await fetch(
