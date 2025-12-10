@@ -94,12 +94,12 @@ cmd(
         { quoted: mek }
       );
 
-      // 🔹 Final reply in MALINDU AI BOT style
+      // 🔹 Final reply in MALIYA-MD style
       return reply(
         "✅ *Song downloaded successfully!* 🎶\n\n" +
         "*🎧 Enjoy your music!*\n" +
         "*👤 Creator:* Malindu Nadith\n\n" +
-        "🙏 Thanks for using *MALINDU AI BOT*"
+        "🙏 Thanks for using *MALIYA-MD*"
       );
     } catch (e) {
       console.log(e);
