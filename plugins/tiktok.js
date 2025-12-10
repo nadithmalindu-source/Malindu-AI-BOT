@@ -1,11 +1,4 @@
-// plugins/tiktok.js
 import fetch from "node-fetch";
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
-// ES Module වල __filename හා __dirname ලබා ගැනීම
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 export default {
   name: "tiktok",
@@ -13,23 +6,30 @@ export default {
   react: "🎵",
   desc: "Download TikTok video without watermark",
   category: "download",
-  filename: __filename,
-  async execute(bot, mek, m, { from, quoted, body, q, reply, sendVideo }) {
+  async execute(bot, mek, m, { from, body, q, reply, sendVideo }) {
     try {
-      // link එක check කරන්න
-      if (!q) return reply("📌 TikTok link ekak denna. Udaharanayak: tt https://www.tiktok.com/xxxx");
+      // User TikTok link validation
+      if (!q) return reply("📌 TikTok link ekak denna. Udaharanayak: tt https://www.tiktok.com/...");
 
-      // TikTok downloader API call
-      const res = await fetch(`https://tikwm.com/api?url=${q}`);
-      if (!res.ok) return reply("❌ TikTok API call ekata error ekak wela.");
+      // RapidAPI TikTok downloader endpoint
+      const url = `https://tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com/?url=${encodeURIComponent(q)}`;
+
+      // API call
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "X-RapidAPI-Host": "tiktok-downloader-download-tiktok-videos-without-watermark.p.rapidapi.com",
+          "X-RapidAPI-Key": "bfb99d7c60msh60d1bf0d14339c1p1c6d34jsn8cffebfe8f5e"
+        }
+      });
 
       const data = await res.json();
 
-      // video link check කරන්න
-      if (!data.video_no_watermark) return reply("❌ Video eka ganna behe 😢");
+      // Check if video link is available
+      if (!data.video || data.video === "") return reply("❌ Video eka ganna behe 😢");
 
-      // video send කරන්න
-      await sendVideo(from, data.video_no_watermark, { caption: "TikTok video 🎬" });
+      // Send TikTok video to chat
+      await sendVideo(from, data.video, { caption: "TikTok video 🎬" });
 
     } catch (err) {
       console.error("TikTok Plugin Error:", err);
