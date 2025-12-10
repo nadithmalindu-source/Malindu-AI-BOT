@@ -1,28 +1,29 @@
-const { cmd } = require('../command');
-const { downloadMediaMessage } = require('../lib/msg');
 const fs = require('fs');
 const path = require('path');
+const { cmd } = require('../command'); // Make sure this path is correct
+const { downloadMediaMessage } = require('../lib/msg');
 
 cmd({
-    pattern: 'str',
+    pattern: 'sticker',
     desc: 'Convert image/video to sticker',
     category: "creative",
     filename: __filename,
     fromMe: false
-}, async (bot, mek, m, { 
-    from, quoted, body, isCmd, command, args, q, isGroup, 
-    sender, senderNumber, botNumber2, botNumber, pushname, 
-    isMe, isOwner, groupMetadata, groupName, participants, 
-    groupAdmins, isBotAdmins, isAdmins, reply 
-}) => {
+}, async (bot, mek, m, { from, quoted, reply }) => {
     try {
-        let mediaMessage = mek.message.imageMessage || mek.message.videoMessage || (quoted ? quoted.message.imageMessage || quoted.message.videoMessage : null);
-        if (!mediaMessage) return reply('❌ Please send an image/video to convert into sticker.');
+        let mediaMessage = mek.message?.imageMessage || mek.message?.videoMessage;
+        if (!mediaMessage && quoted) {
+            mediaMessage = quoted.message?.imageMessage || quoted.message?.videoMessage;
+        }
+
+        if (!mediaMessage) return reply('❌ Please send or reply to an image/video to convert into sticker.');
 
         const buffer = await downloadMediaMessage(bot, mediaMessage);
-        const tmpFile = path.join(__dirname, `../tmp/${Date.now()}.webp`);
+        if (!buffer) return reply('❌ Failed to download media.');
 
+        const tmpFile = path.join(__dirname, `../tmp/${Date.now()}.webp`);
         fs.writeFileSync(tmpFile, buffer);
+
         await bot.sendMessage(from, { sticker: { url: tmpFile } });
         fs.unlinkSync(tmpFile);
     } catch (err) {
