@@ -1,57 +1,58 @@
 const { cmd } = require("../command");
-const axios = require("axios");
+const { tiktokDownloader } = require("@mrnima/tiktok-downloader");
 
 cmd(
   {
     pattern: "tiktok",
-    alias: ["tt", "ttdl"],
-    react: "📥",
-    desc: "Download TikTok Videos",
+    react: "🎵",
+    desc: "Download TikTok Video",
     category: "download",
-    filename: __filename
+    filename: __filename,
   },
-
-  async (bot, mek, m, { from, q, reply }) => {
+  async (
+    danuwa,
+    mek,
+    m,
+    {
+      from,
+      quoted,
+      body,
+      isCmd,
+      command,
+      args,
+      q,
+      isGroup,
+      sender,
+      senderNumber,
+      botNumber2,
+      botNumber,
+      pushname,
+      isMe,
+      isOwner,
+      groupMetadata,
+      groupName,
+      participants,
+      groupAdmins,
+      isBotAdmins,
+      isAdmins,
+      reply,
+    }
+  ) => {
     try {
-      if (!q) return reply("❌ කවුරුද TikTok link එක?");
+      if (!q) return reply("❌ Please provide TikTok video URL!");
 
-      // 🔥 WORKING API
-      const api = `https://hiroshi-api.onrender.com/api/tiktok?url=${q}`;
+      reply("⏳ Downloading your TikTok video...");
 
-      const res = await axios.get(api);
-      const data = res.data;
+      const videoData = await tiktokDownloader(q);
 
-      if (!data.status) return reply("❌ Video not found!");
-
-      const info = data.result;
-
-      let cap = `
-🎬 *TikTok Video Downloader*
--------------------------
-⭐ *Title:* ${info.title}
-👀 *Views:* ${info.stats.playCount}
-👍 *Likes:* ${info.stats.likeCount}
-💬 *Comments:* ${info.stats.commentCount}
-🔄 *Shares:* ${info.stats.shareCount}
--------------------------
-📥 *Powered by Malindu AI BOT*
-      `;
-
-      await bot.sendMessage(
-        from,
-        { image: { url: info.cover }, caption: cap },
-        { quoted: mek }
-      );
-
-      await bot.sendMessage(
-        from,
-        { video: { url: info.noWatermark }, caption: "🎥 *No Watermark Video*" },
-        { quoted: mek }
-      );
+      await danuwa.sendMessage(from, {
+        video: { url: videoData.downloadUrl },
+        caption: `✅ TikTok video downloaded successfully!`,
+      }, { quoted: mek });
 
     } catch (e) {
-      console.log(e);
-      reply("❌ Error: TikTok API failed.");
+      console.error(e);
+      reply(`❌ Error: ${e.message}`);
     }
   }
 );
