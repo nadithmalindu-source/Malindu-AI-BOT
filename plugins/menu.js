@@ -3,7 +3,7 @@ const { cmd, commands } = require("../command");
 cmd(
   {
     pattern: "menu",
-    desc: "Displays all available commands to use MALINDU AI BOT",
+    desc: "Displays all available commands",
     category: "main",
     filename: __filename,
   },
