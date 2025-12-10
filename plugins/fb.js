@@ -67,7 +67,7 @@ Your fb video
         from,
         {
           image: {
-            url: "https://github.com/malinduaibot/MALINDU-AI-BOT/blob/main/image/Screenshot%202025-12-05%20133333.png?raw=true",
+            url: "https://github.com/nadithmalindu-source/Malindu-AI-BOT/blob/main/image/Gemini_Generated_Image_unjbleunjbleunjb.png?raw=true",
           },
           caption: desc,
         },
@@ -83,7 +83,7 @@ Your fb video
         { quoted: mek }
       );
 
-      return reply("Thank you for using DANUWA-MD");
+      return reply("Thank you for using MALIYA-MD");
     } catch (e) {
       console.error(e);
       reply(`*Error:* ${e.message || e}`);
