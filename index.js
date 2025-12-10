@@ -89,7 +89,7 @@ async function connectToWA() {
 
       const up = `MALINDU AI BOT connected ✅\n\nPREFIX: ${prefix}`;
       await bot.sendMessage(ownerNumber[0] + "@s.whatsapp.net", {
-        image: { url: `https://github.com/nadithmalindu-source/Malindu-AI-BOT/blob/main/image/Screenshot%202025-12-05%20133333.png?raw=true` },
+        image: { url: `https://github.com/nadithmalindu-source/Malindu-AI-BOT/blob/main/image/Gemini_Generated_Image_unjbleunjbleunjb.png?raw=true` },
         caption: up
       });
 
