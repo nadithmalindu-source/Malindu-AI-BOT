@@ -6,6 +6,8 @@ const path = require('path');
 cmd({
     pattern: 'str',
     desc: 'Convert image/video to sticker',
+    category: "creative",
+    filename: __filename,
     fromMe: false
 }, async (bot, mek, m, { 
     from, quoted, body, isCmd, command, args, q, isGroup, 
